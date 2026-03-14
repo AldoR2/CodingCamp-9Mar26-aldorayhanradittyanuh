@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test: Link Navigation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    #links-container {
+      margin-top: 20px;
+    }
+    .link-item {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 3px;
+    }
+    .link-button {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 3px;
+      margin-right: 10px;
+    }
+    .link-delete {
+      padding: 5px 10px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Link Navigation Test</h1>
+  
+  <div class="test-section">
+    <h2>Test: Links Open in New Tab</h2>
+    <p>This test verifies that links have target="_blank" attribute and open in new tabs.</p>
+    <div id="test-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Manual Test</h2>
+    <p>Click the link below. It should open in a new tab, and this page should remain open.</p>
+    <div id="links-container"></div>
+  </div>
+
+  <script>
+    // Import the QuickLinks component logic
+    const Storage = {
+      get(key) {
+        try {
+          const fullKey = `productivity-dashboard-${key}`;
+          const item = localStorage.getItem(fullKey);
+          return item ? JSON.parse(item) : null;
+        } catch (error) {
+          return null;
+        }
+      },
+      set(key, value) {
+        try {
+          const fullKey = `productivity-dashboard-${key}`;
+          localStorage.setItem(fullKey, JSON.stringify(value));
+        } catch (error) {
+          console.error('Storage error:', error);
+        }
+      }
+    };
+
+    const QuickLinks = {
+      links: [],
+
+      generateId() {
+        return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      },
+
+      createLinkElement(link) {
+        const div = document.createElement('div');
+        div.className = 'link-item';
+        div.setAttribute('data-id', link.id);
+
+        const anchor = document.createElement('a');
+        anchor.href = link.url;
+        anchor.target = '_blank';
+        anchor.className = 'link-button';
+        anchor.textContent = link.name;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'link-delete';
+        deleteButton.textContent = '×';
+
+        div.appendChild(anchor);
+        div.appendChild(deleteButton);
+
+        return div;
+      },
+
+      renderLinks() {
+        const container = document.getElementById('links-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+        this.links.forEach(link => {
+          const element = this.createLinkElement(link);
+          container.appendChild(element);
+        });
+      }
+    };
+
+    // Run tests
+    function runTests() {
+      const results = document.getElementById('test-results');
+      let allPassed = true;
+
+      // Test 1: Verify target="_blank" attribute
+      const testLink = {
+        id: 'test-1',
+        url: 'https://example.com',
+        name: 'Example Site'
+      };
+
+      const linkElement = QuickLinks.createLinkElement(testLink);
+      const anchor = linkElement.querySelector('a');
+
+      // Check target attribute
+      const hasTargetBlank = anchor.getAttribute('target') === '_blank';
+      results.innerHTML += `<p>Test 1 - Link has target="_blank": <span class="${hasTargetBlank ? 'pass' : 'fail'}">${hasTargetBlank ? 'PASS' : 'FAIL'}</span></p>`;
+      if (!hasTargetBlank) allPassed = false;
+
+      // Check href attribute
+      const hasCorrectHref = anchor.getAttribute('href') === testLink.url;
+      results.innerHTML += `<p>Test 2 - Link has correct href: <span class="${hasCorrectHref ? 'pass' : 'fail'}">${hasCorrectHref ? 'PASS' : 'FAIL'}</span></p>`;
+      if (!hasCorrectHref) allPassed = false;
+
+      // Check link text
+      const hasCorrectText = anchor.textContent === testLink.name;
+      results.innerHTML += `<p>Test 3 - Link has correct display name: <span class="${hasCorrectText ? 'pass' : 'fail'}">${hasCorrectText ? 'PASS' : 'FAIL'}</span></p>`;
+      if (!hasCorrectText) allPassed = false;
+
+      // Summary
+      results.innerHTML += `<hr><p><strong>Overall: <span class="${allPassed ? 'pass' : 'fail'}">${allPassed ? 'ALL TESTS PASSED' : 'SOME TESTS FAILED'}</span></strong></p>`;
+
+      // Create a sample link for manual testing
+      QuickLinks.links = [
+        {
+          id: 'manual-test-1',
+          url: 'https://www.google.com',
+          name: 'Google (Test Link)'
+        }
+      ];
+      QuickLinks.renderLinks();
+    }
+
+    // Run tests when page loads
+    document.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>

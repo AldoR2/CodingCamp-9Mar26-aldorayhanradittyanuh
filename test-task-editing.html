@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Editing Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .success { color: green; }
+    .error { color: red; }
+    .todo-item { margin: 10px 0; }
+    .todo-edit-input {
+      padding: 5px;
+      border: 2px solid #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task Editing Functionality Test</h1>
+  
+  <div class="test-section">
+    <h2>Manual Test Instructions</h2>
+    <ol>
+      <li>Add a task using the form below</li>
+      <li>Click the "Edit" button on the task</li>
+      <li>Verify that an input field appears with the current task text</li>
+      <li>Try editing the text and press Enter (should save)</li>
+      <li>Try editing again and press Escape (should cancel)</li>
+      <li>Try editing and clicking outside the input (should save on blur)</li>
+      <li>Try submitting empty text (should reject and preserve original)</li>
+    </ol>
+  </div>
+
+  <div class="test-section">
+    <h2>Todo List</h2>
+    <form id="todo-form">
+      <input id="todo-input" type="text" placeholder="Add a new task..." style="padding: 8px; width: 70%;">
+      <button type="submit" style="padding: 8px 15px;">Add</button>
+    </form>
+    <ul id="todo-list" style="list-style: none; padding: 0;"></ul>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Results</h2>
+    <div id="test-results"></div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Automated tests
+    const testResults = document.getElementById('test-results');
+    
+    function logTest(message, success) {
+      const p = document.createElement('p');
+      p.className = success ? 'success' : 'error';
+      p.textContent = (success ? '✓ ' : '✗ ') + message;
+      testResults.appendChild(p);
+    }
+
+    // Wait for DOM to be ready
+    setTimeout(() => {
+      // Test 1: Check if editTask method exists
+      logTest('editTask method exists', typeof TodoList.editTask === 'function');
+      
+      // Test 2: Add a test task
+      TodoList.addTask('Test Task for Editing');
+      logTest('Task added successfully', TodoList.tasks.length > 0);
+      
+      // Test 3: Edit the task
+      const taskId = TodoList.tasks[0].id;
+      const originalText = TodoList.tasks[0].text;
+      TodoList.editTask(taskId, 'Updated Task Text');
+      logTest('Task text updated', TodoList.tasks[0].text === 'Updated Task Text');
+      
+      // Test 4: Try to edit with empty text (should reject)
+      TodoList.editTask(taskId, '   ');
+      logTest('Empty text rejected', TodoList.tasks[0].text === 'Updated Task Text');
+      
+      // Test 5: Try to edit with whitespace-only text (should reject)
+      TodoList.editTask(taskId, '');
+      logTest('Whitespace-only text rejected', TodoList.tasks[0].text === 'Updated Task Text');
+      
+      // Test 6: Edit with valid text including whitespace (should trim)
+      TodoList.editTask(taskId, '  Trimmed Text  ');
+      logTest('Text trimmed correctly', TodoList.tasks[0].text === 'Trimmed Text');
+      
+      // Test 7: Check if changes are saved to Local Storage
+      const savedTasks = Storage.get('tasks');
+      logTest('Changes saved to Local Storage', savedTasks && savedTasks[0].text === 'Trimmed Text');
+      
+      // Test 8: Try to edit non-existent task (should handle gracefully)
+      const taskCountBefore = TodoList.tasks.length;
+      TodoList.editTask('non-existent-id', 'Should not crash');
+      logTest('Non-existent task handled gracefully', TodoList.tasks.length === taskCountBefore);
+      
+      console.log('All automated tests completed. Check the results above.');
+    }, 100);
+  </script>
+</body>
+</html>

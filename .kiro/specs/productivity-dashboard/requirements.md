@@ -15,6 +15,9 @@ The Productivity Dashboard is a client-side web application that helps users man
 - **Link**: An individual quick access button with URL and display name
 - **Local_Storage**: Browser's Local Storage API for client-side data persistence
 - **Time_Of_Day**: Morning (5:00-11:59), Afternoon (12:00-16:59), Evening (17:00-20:59), Night (21:00-4:59)
+- **Theme**: Visual appearance mode (light or dark) applied to the Dashboard
+- **User_Name**: Optional custom name displayed in the greeting message
+- **Duplicate_Task**: A Task with text content that matches an existing Task (case-insensitive comparison)
 
 ## Requirements
 
@@ -39,6 +42,18 @@ The Productivity Dashboard is a client-side web application that helps users man
 3. WHEN the current time is between 17:00 and 20:59, THE Greeting_Component SHALL display "Good Evening"
 4. WHEN the current time is between 21:00 and 4:59, THE Greeting_Component SHALL display "Good Night"
 
+### Requirement 17: Custom Name in Greeting
+
+**User Story:** As a user, I want to set a custom name that appears in the greeting, so that the dashboard feels more personal.
+
+#### Acceptance Criteria
+
+1. WHEN the user sets a User_Name, THE Greeting_Component SHALL display the User_Name after the time-based greeting
+2. WHEN the Dashboard loads, THE Greeting_Component SHALL retrieve the saved User_Name from Local_Storage
+3. WHEN the user changes the User_Name, THE Greeting_Component SHALL save the new User_Name to Local_Storage within 100 milliseconds
+4. WHEN no User_Name is set, THE Greeting_Component SHALL display only the time-based greeting without a name
+5. WHEN the user clears the User_Name, THE Greeting_Component SHALL remove the User_Name from Local_Storage
+
 ### Requirement 3: Focus Timer Operation
 
 **User Story:** As a user, I want a 25-minute focus timer, so that I can use the Pomodoro technique for productivity.
@@ -62,6 +77,17 @@ The Productivity Dashboard is a client-side web application that helps users man
 2. WHEN a Task is created, THE Todo_List SHALL display the Task in the list
 3. WHEN a Task is created, THE Todo_List SHALL save the Task to Local_Storage
 4. WHEN the user submits an empty task, THE Todo_List SHALL reject the submission
+
+### Requirement 18: Prevent Duplicate Tasks
+
+**User Story:** As a user, I want to be prevented from adding duplicate tasks, so that my to-do list stays organized without redundant entries.
+
+#### Acceptance Criteria
+
+1. WHEN the user attempts to create a Task with text matching an existing Task, THE Todo_List SHALL reject the submission
+2. WHEN comparing Task text for duplicates, THE Todo_List SHALL perform case-insensitive comparison
+3. WHEN a Duplicate_Task is detected, THE Todo_List SHALL display feedback to the user indicating the task already exists
+4. WHEN a Duplicate_Task is detected, THE Todo_List SHALL not modify Local_Storage
 
 ### Requirement 5: Task Completion
 
@@ -186,3 +212,17 @@ The Productivity Dashboard is a client-side web application that helps users man
 1. THE Dashboard SHALL use exactly one CSS file located in a css directory
 2. THE Dashboard SHALL use exactly one JavaScript file located in a js directory
 3. THE Dashboard SHALL use one HTML file as the entry point
+
+### Requirement 19: Light and Dark Mode Toggle
+
+**User Story:** As a user, I want to switch between light and dark themes, so that I can use the dashboard comfortably in different lighting conditions.
+
+#### Acceptance Criteria
+
+1. WHEN the user toggles the Theme, THE Dashboard SHALL apply the selected Theme to all components
+2. WHEN the Dashboard loads, THE Dashboard SHALL retrieve the saved Theme preference from Local_Storage
+3. WHEN the user changes the Theme, THE Dashboard SHALL save the Theme preference to Local_Storage within 100 milliseconds
+4. WHEN no Theme preference is saved, THE Dashboard SHALL display the light Theme by default
+5. WHEN the dark Theme is active, THE Dashboard SHALL use light text on dark backgrounds
+6. WHEN the light Theme is active, THE Dashboard SHALL use dark text on light backgrounds
+7. WHEN the Theme changes, THE Dashboard SHALL update all component colors within 100 milliseconds

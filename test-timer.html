@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #timer-display { font-size: 48px; margin: 20px 0; }
+    button { padding: 10px 20px; margin: 5px; font-size: 16px; }
+    .test-results { margin-top: 30px; }
+    .pass { color: green; }
+    .fail { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Focus Timer Test</h1>
+  
+  <div id="timer-display">25:00</div>
+  <div id="timer-controls">
+    <button id="timer-start">Start</button>
+    <button id="timer-stop">Stop</button>
+    <button id="timer-reset">Reset</button>
+  </div>
+
+  <div class="test-results">
+    <h2>Test Results:</h2>
+    <div id="test-output"></div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const output = document.getElementById('test-output');
+      
+      function log(message, isPass = true) {
+        const div = document.createElement('div');
+        div.className = isPass ? 'pass' : 'fail';
+        div.textContent = (isPass ? '✓ ' : '✗ ') + message;
+        output.appendChild(div);
+      }
+
+      // Run tests after a short delay to ensure initialization
+      setTimeout(() => {
+        log('Testing FocusTimer implementation...');
+        
+        // Test 1: Initial state
+        if (FocusTimer.timeRemaining === 1500) {
+          log('Initial time is 25 minutes (1500 seconds)');
+        } else {
+          log(`Initial time should be 1500, got ${FocusTimer.timeRemaining}`, false);
+        }
+
+        if (!FocusTimer.isRunning) {
+          log('Timer is not running initially');
+        } else {
+          log('Timer should not be running initially', false);
+        }
+
+        // Test 2: Start method
+        FocusTimer.start();
+        if (FocusTimer.isRunning) {
+          log('start() sets isRunning to true');
+        } else {
+          log('start() should set isRunning to true', false);
+        }
+
+        if (FocusTimer.intervalId !== null) {
+          log('start() creates an interval');
+        } else {
+          log('start() should create an interval', false);
+        }
+
+        // Test 3: Tick method (wait for countdown)
+        setTimeout(() => {
+          if (FocusTimer.timeRemaining < 1500) {
+            log(`tick() decrements time (now at ${FocusTimer.timeRemaining})`);
+          } else {
+            log('tick() should decrement time', false);
+          }
+
+          // Test 4: Stop method
+          FocusTimer.stop();
+          const timeAfterStop = FocusTimer.timeRemaining;
+          
+          if (!FocusTimer.isRunning) {
+            log('stop() sets isRunning to false');
+          } else {
+            log('stop() should set isRunning to false', false);
+          }
+
+          if (FocusTimer.intervalId === null) {
+            log('stop() clears the interval');
+          } else {
+            log('stop() should clear the interval', false);
+          }
+
+          // Test 5: Verify timer stays stopped
+          setTimeout(() => {
+            if (FocusTimer.timeRemaining === timeAfterStop) {
+              log('Timer stays paused after stop()');
+            } else {
+              log('Timer should stay paused after stop()', false);
+            }
+
+            // Test 6: Reset method
+            FocusTimer.reset();
+            if (FocusTimer.timeRemaining === 1500) {
+              log('reset() returns time to 1500 seconds');
+            } else {
+              log(`reset() should return to 1500, got ${FocusTimer.timeRemaining}`, false);
+            }
+
+            if (!FocusTimer.isRunning) {
+              log('reset() stops the timer');
+            } else {
+              log('reset() should stop the timer', false);
+            }
+
+            // Test 7: Timer stops at zero
+            FocusTimer.timeRemaining = 2;
+            FocusTimer.start();
+            
+            setTimeout(() => {
+              if (FocusTimer.timeRemaining === 0) {
+                log('Timer reaches zero');
+              } else {
+                log(`Timer should reach zero, got ${FocusTimer.timeRemaining}`, false);
+              }
+
+              if (!FocusTimer.isRunning) {
+                log('Timer stops automatically at zero');
+              } else {
+                log('Timer should stop automatically at zero', false);
+              }
+
+              log('All tests completed!');
+            }, 2500);
+          }, 1000);
+        }, 2000);
+      }, 100);
+    });
+  </script>
+</body>
+</html>

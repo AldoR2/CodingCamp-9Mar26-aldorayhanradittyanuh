@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Tests - Productivity Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #007bff;
+      padding-bottom: 10px;
+    }
+    .test-suite {
+      background: white;
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-suite h2 {
+      color: #007bff;
+      margin-top: 0;
+    }
+    .pass {
+      color: #28a745;
+      padding: 5px 0;
+    }
+    .fail {
+      color: #dc3545;
+      padding: 5px 0;
+      font-weight: bold;
+    }
+    .summary {
+      background: #e9ecef;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .summary.all-pass {
+      background: #d4edda;
+      color: #155724;
+    }
+    .summary.has-fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <h1>Productivity Dashboard - Test Suite</h1>
+  <p>Running all core functionality tests...</p>
+
+  <div class="test-suite">
+    <h2>Storage Utility Tests</h2>
+    <div id="storage-tests"></div>
+  </div>
+
+  <div class="test-suite">
+    <h2>Greeting Component Tests</h2>
+    <div id="greeting-tests"></div>
+  </div>
+
+  <div class="test-suite">
+    <h2>Focus Timer Tests</h2>
+    <div id="timer-tests"></div>
+  </div>
+
+  <div class="test-suite">
+    <h2>Todo List Tests</h2>
+    <div id="todo-tests"></div>
+  </div>
+
+  <div id="summary" class="summary"></div>
+
+  <script src="js/script.js"></script>
+  <script>
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    function log(containerId, message, isPass = true) {
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = isPass ? 'pass' : 'fail';
+      div.textContent = (isPass ? '✓ ' : '✗ ') + message;
+      container.appendChild(div);
+      
+      totalTests++;
+      if (isPass) {
+        passedTests++;
+      } else {
+        failedTests++;
+      }
+    }
+
+    function updateSummary() {
+      const summary = document.getElementById('summary');
+      summary.textContent = `Test Results: ${passedTests}/${totalTests} passed`;
+      if (failedTests === 0) {
+        summary.className = 'summary all-pass';
+        summary.textContent += ' ✓ All tests passed!';
+      } else {
+        summary.className = 'summary has-fail';
+        summary.textContent += ` (${failedTests} failed)`;
+      }
+    }
+
+    // Storage Tests
+    function runStorageTests() {
+      try {
+        // Test 1: Set and Get
+        Storage.set('test-key', { name: 'Test', value: 123 });
+        const result = Storage.get('test-key');
+        log('storage-tests', 'Set and Get work correctly', 
+          result && result.name === 'Test' && result.value === 123);
+
+        // Test 2: Get non-existent key
+        log('storage-tests', 'Get returns null for non-existent key', 
+          Storage.get('non-existent-key') === null);
+
+        // Test 3: Set array
+        const testArray = [1, 2, 3, 4, 5];
+        Storage.set('test-array', testArray);
+        log('storage-tests', 'Arrays stored and retrieved correctly', 
+          JSON.stringify(Storage.get('test-array')) === JSON.stringify(testArray));
+
+        // Test 4: Remove
+        Storage.set('test-remove', 'data');
+        Storage.remove('test-remove');
+        log('storage-tests', 'Remove works correctly', 
+          Storage.get('test-remove') === null);
+
+        // Test 5: Key prefix
+        Storage.set('prefix-test', 'value');
+        const hasPrefix = localStorage.getItem('productivity-dashboard-prefix-test') !== null;
+        Storage.remove('prefix-test');
+        log('storage-tests', 'Keys are prefixed correctly', hasPrefix);
+
+        // Test 6: Clear
+        Storage.set('test-clear-1', 'data1');
+        Storage.set('test-clear-2', 'data2');
+        Storage.clear();
+        log('storage-tests', 'Clear removes all dashboard data', 
+          Storage.get('test-clear-1') === null && Storage.get('test-clear-2') === null);
+      } catch (error) {
+        log('storage-tests', `Storage tests failed: ${error.message}`, false);
+      }
+    }
+
+    // Greeting Component Tests
+    function runGreetingTests() {
+      try {
+        // Test 1: Component exists
+        log('greeting-tests', 'GreetingComponent exists', 
+          typeof GreetingComponent === 'object');
+
+        // Test 2: Has required methods
+        log('greeting-tests', 'Has init method', 
+          typeof GreetingComponent.init === 'function');
+        log('greeting-tests', 'Has updateTime method', 
+          typeof GreetingComponent.updateTime === 'function');
+        log('greeting-tests', 'Has formatTime method', 
+          typeof GreetingComponent.formatTime === 'function');
+        log('greeting-tests', 'Has formatDate method', 
+          typeof GreetingComponent.formatDate === 'function');
+        log('greeting-tests', 'Has getTimeOfDay method', 
+          typeof GreetingComponent.getTimeOfDay === 'function');
+        log('greeting-tests', 'Has getGreeting method', 
+          typeof GreetingComponent.getGreeting === 'function');
+
+        // Test 3: formatTime works correctly
+        const testDate = new Date('2024-01-15T15:30:00');
+        const formattedTime = GreetingComponent.formatTime(testDate);
+        log('greeting-tests', 'formatTime returns correct format', 
+          formattedTime === '3:30 PM');
+
+        // Test 4: formatDate works correctly
+        const formattedDate = GreetingComponent.formatDate(testDate);
+        log('greeting-tests', 'formatDate returns correct format', 
+          formattedDate === 'Monday, January 15');
+
+        // Test 5: getGreeting returns valid greeting
+        const greeting = GreetingComponent.getGreeting();
+        const validGreetings = ['Good Morning', 'Good Afternoon', 'Good Evening', 'Good Night'];
+        log('greeting-tests', 'getGreeting returns valid greeting', 
+          validGreetings.includes(greeting));
+
+        // Test 6: Interval is set after init
+        log('greeting-tests', 'Interval is set after init', 
+          GreetingComponent.intervalId !== null);
+      } catch (error) {
+        log('greeting-tests', `Greeting tests failed: ${error.message}`, false);
+      }
+    }
+
+    // Focus Timer Tests
+    function runTimerTests() {
+      return new Promise((resolve) => {
+        try {
+          // Test 1: Initial state
+          log('timer-tests', 'Initial time is 1500 seconds', 
+            FocusTimer.timeRemaining === 1500);
+          log('timer-tests', 'Timer not running initially', 
+            !FocusTimer.isRunning);
+
+          // Test 2: formatTime works
+          log('timer-tests', 'formatTime(1500) returns "25:00"', 
+            FocusTimer.formatTime(1500) === '25:00');
+          log('timer-tests', 'formatTime(65) returns "01:05"', 
+            FocusTimer.formatTime(65) === '01:05');
+
+          // Test 3: Start method
+          FocusTimer.start();
+          log('timer-tests', 'start() sets isRunning to true', 
+            FocusTimer.isRunning);
+          log('timer-tests', 'start() creates interval', 
+            FocusTimer.intervalId !== null);
+
+          // Test 4: Tick decrements time
+          setTimeout(() => {
+            log('timer-tests', 'tick() decrements time', 
+              FocusTimer.timeRemaining < 1500);
+
+            // Test 5: Stop method
+            FocusTimer.stop();
+            const timeAfterStop = FocusTimer.timeRemaining;
+            log('timer-tests', 'stop() sets isRunning to false', 
+              !FocusTimer.isRunning);
+            log('timer-tests', 'stop() clears interval', 
+              FocusTimer.intervalId === null);
+
+            // Test 6: Timer stays stopped
+            setTimeout(() => {
+              log('timer-tests', 'Timer stays paused after stop()', 
+                FocusTimer.timeRemaining === timeAfterStop);
+
+              // Test 7: Reset method
+              FocusTimer.reset();
+              log('timer-tests', 'reset() returns time to 1500', 
+                FocusTimer.timeRemaining === 1500);
+              log('timer-tests', 'reset() stops timer', 
+                !FocusTimer.isRunning);
+
+              // Test 8: Timer stops at zero
+              FocusTimer.timeRemaining = 1;
+              FocusTimer.start();
+              setTimeout(() => {
+                log('timer-tests', 'Timer reaches zero', 
+                  FocusTimer.timeRemaining === 0);
+                log('timer-tests', 'Timer stops automatically at zero', 
+                  !FocusTimer.isRunning);
+                
+                // Reset for next tests
+                FocusTimer.reset();
+                resolve();
+              }, 1500);
+            }, 1000);
+          }, 1500);
+        } catch (error) {
+          log('timer-tests', `Timer tests failed: ${error.message}`, false);
+          resolve();
+        }
+      });
+    }
+
+    // Todo List Tests
+    function runTodoTests() {
+      try {
+        // Clear any existing tasks
+        TodoList.tasks = [];
+        TodoList.saveTasks();
+
+        // Test 1: Component exists
+        log('todo-tests', 'TodoList component exists', 
+          typeof TodoList === 'object');
+
+        // Test 2: Has required methods
+        log('todo-tests', 'Has addTask method', 
+          typeof TodoList.addTask === 'function');
+        log('todo-tests', 'Has toggleTask method', 
+          typeof TodoList.toggleTask === 'function');
+        log('todo-tests', 'Has editTask method', 
+          typeof TodoList.editTask === 'function');
+        log('todo-tests', 'Has deleteTask method', 
+          typeof TodoList.deleteTask === 'function');
+
+        // Test 3: Add task
+        TodoList.addTask('Test Task 1');
+        log('todo-tests', 'addTask adds task to array', 
+          TodoList.tasks.length === 1);
+        log('todo-tests', 'Task has correct text', 
+          TodoList.tasks[0].text === 'Test Task 1');
+        log('todo-tests', 'Task has id', 
+          typeof TodoList.tasks[0].id === 'string');
+        log('todo-tests', 'Task is not completed initially', 
+          TodoList.tasks[0].completed === false);
+
+        // Test 4: Reject empty task
+        const countBefore = TodoList.tasks.length;
+        TodoList.addTask('   ');
+        log('todo-tests', 'Empty task rejected', 
+          TodoList.tasks.length === countBefore);
+
+        // Test 5: Toggle task
+        const taskId = TodoList.tasks[0].id;
+        TodoList.toggleTask(taskId);
+        log('todo-tests', 'toggleTask marks task as completed', 
+          TodoList.tasks[0].completed === true);
+        TodoList.toggleTask(taskId);
+        log('todo-tests', 'toggleTask marks task as incomplete', 
+          TodoList.tasks[0].completed === false);
+
+        // Test 6: Edit task
+        TodoList.editTask(taskId, 'Updated Task');
+        log('todo-tests', 'editTask updates task text', 
+          TodoList.tasks[0].text === 'Updated Task');
+
+        // Test 7: Reject empty edit
+        TodoList.editTask(taskId, '   ');
+        log('todo-tests', 'Empty edit rejected', 
+          TodoList.tasks[0].text === 'Updated Task');
+
+        // Test 8: Delete task
+        TodoList.deleteTask(taskId);
+        log('todo-tests', 'deleteTask removes task', 
+          TodoList.tasks.length === 0);
+
+        // Test 9: Storage integration
+        TodoList.addTask('Storage Test');
+        const savedTasks = Storage.get('tasks');
+        log('todo-tests', 'Tasks saved to Local Storage', 
+          savedTasks && savedTasks.length === 1);
+
+        // Clean up
+        TodoList.tasks = [];
+        TodoList.saveTasks();
+      } catch (error) {
+        log('todo-tests', `Todo tests failed: ${error.message}`, false);
+      }
+    }
+
+    // Run all tests
+    async function runAllTests() {
+      runStorageTests();
+      runGreetingTests();
+      await runTimerTests();
+      runTodoTests();
+      updateSummary();
+    }
+
+    // Start tests after DOM is ready and components are initialized
+    setTimeout(() => {
+      runAllTests();
+    }, 100);
+  </script>
+</body>
+</html>
