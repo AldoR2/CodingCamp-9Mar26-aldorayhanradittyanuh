@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productivity Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="dashboard">
+    <!-- Greeting Component -->
+    <section id="greeting-section">
+      <div id="time-display"></div>
+      <div id="date-display"></div>
+      <div id="greeting-message"></div>
+    </section>
+
+    <!-- Focus Timer Component -->
+    <section id="timer-section">
+      <div id="timer-display">25:00</div>
+      <div id="timer-controls">
+        <button id="timer-start">Start</button>
+        <button id="timer-stop">Stop</button>
+        <button id="timer-reset">Reset</button>
+      </div>
+    </section>
+
+    <!-- Todo List Component -->
+    <section id="todo-section">
+      <form id="todo-form">
+        <input id="todo-input" type="text" placeholder="Add a new task..." aria-label="New task">
+        <button type="submit">Add</button>
+      </form>
+      <ul id="todo-list"></ul>
+    </section>
+
+    <!-- Quick Links Component -->
+    <section id="links-section">
+      <form id="link-form">
+        <input id="link-url" type="url" placeholder="URL" aria-label="Link URL" required>
+        <input id="link-name" type="text" placeholder="Display name" aria-label="Link name" required>
+        <button type="submit">Add Link</button>
+      </form>
+      <div id="links-container"></div>
+    </section>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Utility Test</title>
+</head>
+<body>
+  <h1>Storage Utility Test</h1>
+  <div id="test-results"></div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Simple test suite for Storage utility
+    const testResults = document.getElementById('test-results');
+    
+    function log(message, isError = false) {
+      const p = document.createElement('p');
+      p.textContent = message;
+      p.style.color = isError ? 'red' : 'green';
+      testResults.appendChild(p);
+    }
+
+    function runTests() {
+      log('=== Storage Utility Tests ===');
+      
+      // Test 1: Set and Get
+      try {
+        Storage.set('test-key', { name: 'Test', value: 123 });
+        const result = Storage.get('test-key');
+        if (result && result.name === 'Test' && result.value === 123) {
+          log('✓ Test 1 PASSED: Set and Get work correctly');
+        } else {
+          log('✗ Test 1 FAILED: Retrieved data does not match', true);
+        }
+      } catch (error) {
+        log(`✗ Test 1 FAILED: ${error.message}`, true);
+      }
+
+      // Test 2: Get non-existent key
+      try {
+        const result = Storage.get('non-existent-key');
+        if (result === null) {
+          log('✓ Test 2 PASSED: Get returns null for non-existent key');
+        } else {
+          log('✗ Test 2 FAILED: Should return null for non-existent key', true);
+        }
+      } catch (error) {
+        log(`✗ Test 2 FAILED: ${error.message}`, true);
+      }
+
+      // Test 3: Set array
+      try {
+        const testArray = [1, 2, 3, 4, 5];
+        Storage.set('test-array', testArray);
+        const result = Storage.get('test-array');
+        if (JSON.stringify(result) === JSON.stringify(testArray)) {
+          log('✓ Test 3 PASSED: Arrays are stored and retrieved correctly');
+        } else {
+          log('✗ Test 3 FAILED: Array data mismatch', true);
+        }
+      } catch (error) {
+        log(`✗ Test 3 FAILED: ${error.message}`, true);
+      }
+
+      // Test 4: Remove
+      try {
+        Storage.set('test-remove', 'data');
+        Storage.remove('test-remove');
+        const result = Storage.get('test-remove');
+        if (result === null) {
+          log('✓ Test 4 PASSED: Remove works correctly');
+        } else {
+          log('✗ Test 4 FAILED: Data should be removed', true);
+        }
+      } catch (error) {
+        log(`✗ Test 4 FAILED: ${error.message}`, true);
+      }
+
+      // Test 5: Clear
+      try {
+        Storage.set('test-clear-1', 'data1');
+        Storage.set('test-clear-2', 'data2');
+        Storage.clear();
+        const result1 = Storage.get('test-clear-1');
+        const result2 = Storage.get('test-clear-2');
+        if (result1 === null && result2 === null) {
+          log('✓ Test 5 PASSED: Clear removes all dashboard data');
+        } else {
+          log('✗ Test 5 FAILED: Clear did not remove all data', true);
+        }
+      } catch (error) {
+        log(`✗ Test 5 FAILED: ${error.message}`, true);
+      }
+
+      // Test 6: Verify key prefix
+      try {
+        Storage.set('prefix-test', 'value');
+        const hasPrefix = localStorage.getItem('productivity-dashboard-prefix-test') !== null;
+        Storage.remove('prefix-test');
+        if (hasPrefix) {
+          log('✓ Test 6 PASSED: Keys are prefixed correctly');
+        } else {
+          log('✗ Test 6 FAILED: Key prefix not applied', true);
+        }
+      } catch (error) {
+        log(`✗ Test 6 FAILED: ${error.message}`, true);
+      }
+
+      log('=== Tests Complete ===');
+    }
+
+    // Run tests when page loads
+    runTests();
+  </script>
+</body>
+</html>
