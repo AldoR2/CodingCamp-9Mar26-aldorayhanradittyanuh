@@ -7,12 +7,22 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Theme Toggle Button -->
+  <div id="theme-toggle-container">
+    <button id="theme-toggle" aria-label="Toggle theme">
+      <span id="theme-icon">🌙</span>
+    </button>
+  </div>
+
   <main class="dashboard">
     <!-- Greeting Component -->
     <section id="greeting-section">
       <div id="time-display"></div>
       <div id="date-display"></div>
       <div id="greeting-message"></div>
+      <div id="name-input-container">
+        <input id="name-input" type="text" placeholder="Enter your name..." aria-label="Your name">
+      </div>
     </section>
 
     <!-- Focus Timer Component -->
@@ -31,6 +41,7 @@
         <input id="todo-input" type="text" placeholder="Add a new task..." aria-label="New task">
         <button type="submit">Add</button>
       </form>
+      <div id="todo-feedback" class="todo-feedback" role="alert" aria-live="polite"></div>
       <ul id="todo-list"></ul>
     </section>
 

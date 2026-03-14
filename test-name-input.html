@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Name Input Style Test</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .test-container {
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .theme-toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--accent-color);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+  
+  <div class="test-container">
+    <h1 style="color: var(--text-primary); margin-bottom: 2rem;">Name Input Field Style Test</h1>
+    
+    <div class="test-section">
+      <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Default State</h2>
+      <div id="name-input-container">
+        <input id="name-input" type="text" placeholder="Enter your name..." aria-label="Your name">
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 style="color: var(--text-primary); margin-bottom: 1rem;">With Value</h2>
+      <div id="name-input-container">
+        <input type="text" value="John Doe" style="background: var(--bg-primary); border: 2px solid var(--border-color); border-radius: 8px; padding: 0.75rem 1rem; color: var(--text-primary); font-size: 1rem; outline: none; transition: all 0.2s ease; text-align: center; max-width: 300px; width: 100%;">
+      </div>
+    </div>
+    
+    <div class="test-section">
+      <h2 style="color: var(--text-primary); margin-bottom: 1rem;">Instructions</h2>
+      <ul style="color: var(--text-primary);">
+        <li>Click the input field to see focus state (blue border with subtle shadow)</li>
+        <li>Toggle between light and dark themes using the button</li>
+        <li>Verify text is readable in both themes</li>
+        <li>Check that placeholder text is visible but subtle</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme === 'light' ? '' : 'dark');
+      if (newTheme === 'light') {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -72,11 +72,15 @@ const Storage = {
 // Greeting Component - Displays current time, date, and time-based greeting
 const GreetingComponent = {
     intervalId: null,
+    userName: '',
 
     /**
      * Initializes the greeting component and starts the time update interval
      */
     init() {
+        // Load user name from Local Storage
+        this.loadUserName();
+
         // Update immediately on load
         this.updateTime();
 
@@ -84,6 +88,28 @@ const GreetingComponent = {
         this.intervalId = setInterval(() => {
             this.updateTime();
         }, 1000);
+
+        // Set up event listener for name input
+        const nameInput = document.getElementById('name-input');
+        if (nameInput) {
+            // Set initial value from loaded name
+            nameInput.value = this.userName;
+
+            // Listen for input changes
+            nameInput.addEventListener('input', (e) => {
+                const name = e.target.value;
+
+                // If input is empty or only whitespace, clear the name
+                if (!name.trim()) {
+                    this.clearUserName();
+                } else {
+                    this.saveUserName(name);
+                }
+
+                // Update greeting message immediately
+                this.updateGreetingMessage();
+            });
+        }
     },
 
     /**
@@ -105,10 +131,7 @@ const GreetingComponent = {
         }
 
         // Update greeting message
-        const greetingMessage = document.getElementById('greeting-message');
-        if (greetingMessage) {
-            greetingMessage.textContent = this.getGreeting();
-        }
+        this.updateGreetingMessage();
     },
 
     /**
@@ -185,6 +208,55 @@ const GreetingComponent = {
             default:
                 return 'Hello';
         }
+    },
+
+    /**
+     * Loads the user name from Local Storage
+     */
+    loadUserName() {
+        const savedName = Storage.get('username');
+        if (savedName && typeof savedName === 'string') {
+            this.userName = savedName;
+        } else {
+            this.userName = '';
+        }
+    },
+
+    /**
+     * Saves the user name to Local Storage
+     * @param {string} name - The user's name to save
+     */
+    saveUserName(name) {
+        this.userName = name;
+        Storage.set('username', name);
+    },
+
+    /**
+     * Clears the user name from Local Storage and component state
+     */
+    clearUserName() {
+        this.userName = '';
+        Storage.remove('username');
+    },
+
+    /**
+     * Updates the greeting message display with time-based greeting and optional name
+     */
+    updateGreetingMessage() {
+        const greetingMessage = document.getElementById('greeting-message');
+        if (!greetingMessage) {
+            return;
+        }
+
+        // Get base greeting
+        let greeting = this.getGreeting();
+
+        // Append name if set
+        if (this.userName.trim()) {
+            greeting += `, ${this.userName}`;
+        }
+
+        greetingMessage.textContent = greeting;
     }
 };
 
@@ -315,6 +387,7 @@ const FocusTimer = {
 // Todo List Component - Manages task creation, editing, completion, and deletion
 const TodoList = {
     tasks: [],
+    feedbackTimeoutId: null,
 
     /**
      * Initializes the todo list component, loads tasks, and sets up event listeners
@@ -368,6 +441,70 @@ const TodoList = {
     },
 
     /**
+     * Checks if a task with the given text already exists (case-insensitive)
+     * @param {string} text - The task text to check
+     * @param {string} excludeId - Optional task ID to exclude from the check (for editing)
+     * @returns {boolean} True if a duplicate exists, false otherwise
+     */
+    isDuplicate(text, excludeId = null) {
+        const normalizedText = text.trim().toLowerCase();
+
+        return this.tasks.some(task => {
+            // Skip the task being edited
+            if (excludeId && task.id === excludeId) {
+                return false;
+            }
+
+            // Compare normalized text
+            return task.text.toLowerCase() === normalizedText;
+        });
+    },
+
+    /**
+     * Displays a feedback message to the user
+     * @param {string} message - The message to display
+     * @param {string} type - The message type ('error', 'success', etc.)
+     */
+    showFeedback(message, type = 'error') {
+        const feedbackElement = document.getElementById('todo-feedback');
+        if (!feedbackElement) {
+            return;
+        }
+
+        // Clear any existing timeout
+        if (this.feedbackTimeoutId) {
+            clearTimeout(this.feedbackTimeoutId);
+        }
+
+        // Set message and type
+        feedbackElement.textContent = message;
+        feedbackElement.className = `todo-feedback show ${type}`;
+
+        // Auto-hide after 3 seconds
+        this.feedbackTimeoutId = setTimeout(() => {
+            this.hideFeedback();
+        }, 3000);
+    },
+
+    /**
+     * Hides the feedback message
+     */
+    hideFeedback() {
+        const feedbackElement = document.getElementById('todo-feedback');
+        if (!feedbackElement) {
+            return;
+        }
+
+        feedbackElement.classList.remove('show');
+
+        // Clear timeout reference
+        if (this.feedbackTimeoutId) {
+            clearTimeout(this.feedbackTimeoutId);
+            this.feedbackTimeoutId = null;
+        }
+    },
+
+    /**
      * Creates a new task and adds it to the list
      * @param {string} text - The task description
      */
@@ -377,6 +514,12 @@ const TodoList = {
 
         // Reject empty submissions
         if (!trimmedText) {
+            return;
+        }
+
+        // Check for duplicates
+        if (this.isDuplicate(trimmedText)) {
+            this.showFeedback('This task already exists', 'error');
             return;
         }
 
@@ -438,6 +581,14 @@ const TodoList = {
         const task = this.tasks.find(t => t.id === id);
 
         if (!task) {
+            return;
+        }
+
+        // Check for duplicates (excluding the current task)
+        if (this.isDuplicate(trimmedText, id)) {
+            this.showFeedback('This task already exists', 'error');
+            // Re-render to restore original state
+            this.renderTasks();
             return;
         }
 
@@ -780,8 +931,117 @@ const QuickLinks = {
     }
 };
 
+// Theme Manager Component - Handles light/dark mode switching
+const ThemeManager = {
+    currentTheme: 'light',
+
+    /**
+     * Initializes the theme manager, loads saved theme, and sets up event listeners
+     */
+    init() {
+        // Load saved theme preference
+        this.loadTheme();
+
+        // Apply the loaded theme
+        this.applyTheme(this.currentTheme);
+
+        // Update toggle icon to match current theme
+        this.updateToggleIcon();
+
+        // Set up event listener for theme toggle button
+        const toggleButton = document.getElementById('theme-toggle');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', () => {
+                this.toggleTheme();
+            });
+        }
+    },
+
+    /**
+     * Loads the saved theme preference from Local Storage
+     */
+    loadTheme() {
+        const savedTheme = Storage.get('theme');
+
+        // Validate the saved theme value
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+            this.currentTheme = savedTheme;
+        } else {
+            // Default to light theme if no valid preference is saved
+            this.currentTheme = 'light';
+
+            // Log warning if invalid value was found
+            if (savedTheme !== null) {
+                console.warn(`Invalid theme value "${savedTheme}" found in storage. Defaulting to light theme.`);
+                // Save the corrected value
+                this.saveTheme('light');
+            }
+        }
+    },
+
+    /**
+     * Saves the theme preference to Local Storage
+     * @param {string} theme - The theme to save ('light' or 'dark')
+     */
+    saveTheme(theme) {
+        Storage.set('theme', theme);
+    },
+
+    /**
+     * Toggles between light and dark themes
+     */
+    toggleTheme() {
+        // Switch to the opposite theme
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+
+        // Update current theme
+        this.currentTheme = newTheme;
+
+        // Apply the new theme
+        this.applyTheme(newTheme);
+
+        // Save the preference
+        this.saveTheme(newTheme);
+
+        // Update the toggle icon
+        this.updateToggleIcon();
+    },
+
+    /**
+     * Applies the specified theme by setting the data-theme attribute on document root
+     * @param {string} theme - The theme to apply ('light' or 'dark')
+     */
+    applyTheme(theme) {
+        // Set the data-theme attribute on the document root element
+        document.documentElement.setAttribute('data-theme', theme);
+    },
+
+    /**
+     * Updates the theme toggle button icon based on the current theme
+     * Shows 🌙 (moon) for light mode and ☀️ (sun) for dark mode
+     */
+    updateToggleIcon() {
+        const themeIcon = document.getElementById('theme-icon');
+        if (!themeIcon) {
+            return;
+        }
+
+        // Update icon based on current theme
+        // Moon icon for light mode (click to go dark)
+        // Sun icon for dark mode (click to go light)
+        if (this.currentTheme === 'light') {
+            themeIcon.textContent = '🌙';
+        } else {
+            themeIcon.textContent = '☀️';
+        }
+    }
+};
+
 // Initialize application when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize ThemeManager first to apply theme before other components render
+    ThemeManager.init();
+
     // Initialize Greeting Component
     GreetingComponent.init();
 
